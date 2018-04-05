@@ -10,7 +10,6 @@ public class CipherBreaker {
 	 * 1. Allows user to enter a source file.
 	 * 2. Allows user to enter a output file name.
 	 * 3. Deciphers the source file and outputs it to the output file.
-	 * 4. Exits the application.
 	 * @param args
 	 */
 
