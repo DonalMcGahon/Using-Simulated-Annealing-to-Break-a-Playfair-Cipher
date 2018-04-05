@@ -190,24 +190,6 @@ public class CipherBreaker {
         return ShuffledKey;
     }
     
-    private char[][] StringToMatrix(String Key) {
-        char[][] Matrix = new char[5][5];
-        Key = Key.toUpperCase();
-        int row = 0;
-        int col = 0;
-        for (int i = 0; i < 25; i++) {
-            Matrix[row][col] = Key.charAt(i);
-            rowIndices[Key.charAt(i) - 65] = row;
-            colIndices[Key.charAt(i) - 65] = col;
-            col++;
-            if (col == 5) {
-                row++;
-                col = 0;
-            }
-        }
-        return Matrix;
-    }
-    
     private String MatrixToString(char[][] Matrix) {
         String Key = "";
         for (int i = 0; i < 5; i++) {

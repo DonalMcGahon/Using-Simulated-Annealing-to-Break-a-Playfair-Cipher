@@ -1,0 +1,131 @@
+package ie.gmit.sw.ai;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class CipherBreaker {
+	
+    int TotalRuns = 0;
+    int ReverseKey = 0;
+    int SwapRows = 0;
+    int SwapColumns = 0;
+    int FlipRows = 0;
+    int FlipColumns = 0;
+    int SwapChars = 0;
+
+    char[][] Matrix;
+
+    String Text;
+    String DecryptedText;
+
+    int[] rowIndices;
+    int[] colIndices;
+
+    Map<String, Integer> QuadgramsStats;
+    Double Total4Grams;
+
+    Double Temp;
+    int Transitions;
+
+    public CipherBreaker() {
+        this.rowIndices = new int[26];
+        this.colIndices = new int[26];
+    }
+
+
+	/**
+	 * Main method creates a user interface that gives the user options.
+	 * 1. Allows user to enter a source file.
+	 * 2. Allows user to enter a output file name.
+	 * 3. Deciphers the source file and outputs it to the output file.
+	 * 4. Exits the application.
+	 * @param args
+	 */
+
+	public static void main(String[] args) {
+	    CipherBreaker breaker = new CipherBreaker();
+	
+	    String SourceFile = "", OutputFile = "";
+	    Scanner reader = new Scanner(System.in);  // Reading from System.in
+	
+	    while (true) {
+	        System.out.println("PlayfairCipher Breaker\n\n1.Enter Source File\n2.Enter Output File\n3.Decipher\n\n4.Exit");
+	
+	        System.out.println("\n\nChoose:");
+	        int n = reader.nextInt();
+	        switch (n) {
+	            case 1:
+	                System.out.println("\n\nEnter Source File Name:");
+	                SourceFile = reader.next();
+	                break;
+	            case 2:
+	                System.out.println("\n\nEnter Output File Name:");
+	                OutputFile = reader.next();
+	                break;
+	            case 3:
+	                breaker.BreakCipher(SourceFile, OutputFile);
+	                break;
+	            case 4:
+	                reader.close();
+	                return;
+	        }
+	
+	    }
+	}
+	
+    /**
+     * The Simulated Annealing Algorithm
+     * @param FileName
+     * @param OutputFile
+     */
+    public void BreakCipher(String FileName, String OutputFile) {
+        try {
+            if (QuadgramsStats == null) {
+                ReadQuadgramStats();
+            }
+            Random rand = new Random();
+            Text = ReadText(FileName);
+            if (Text.length() <= 120)
+                Temp = 10.0 + (0.087 * (Text.length() - 84));
+            else if (Text.length() <= 130)
+                Temp = 14.0;
+            else
+                Temp = 45.0;
+            String ParentKey = GenerateKey();
+            DecryptedText = Decrypt(ParentKey);
+            Double Parentfitness = CalculateFitness(DecryptedText);
+
+            for (; Temp > 0; Temp -= 1) {
+                for (Transitions = 50000; Transitions > 0; Transitions -= 1) {
+                    String ChildKey = Shuffle(ParentKey);
+                    DecryptedText = Decrypt(ChildKey);
+                    Double Childfitness = CalculateFitness(DecryptedText);
+                    Double Delta = Childfitness - Parentfitness;
+
+                    if (Delta > 0) {
+                        ParentKey = ChildKey;
+                        Parentfitness = Childfitness;
+                        System.out.println(ParentKey);
+                        System.out.println(Parentfitness);
+                    } else if (Delta < 0 && (1.0 / Math.exp((-1 * Delta) / Temp) > rand.nextDouble())) {
+                        ParentKey = ChildKey;
+                        Parentfitness = Childfitness;
+                    }
+                }
+            }
+            DecryptedText = Decrypt(ParentKey);
+            try (PrintWriter out = new PrintWriter(OutputFile)) {
+                out.println(DecryptedText);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+    }
+}
