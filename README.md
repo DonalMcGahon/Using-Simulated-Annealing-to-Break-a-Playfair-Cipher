@@ -30,4 +30,11 @@ shuffles an array key of n elements (indices 0..n-1) as follows:
 
 ![image](https://user-images.githubusercontent.com/14197773/38440627-ec5144ee-39d9-11e8-9363-1e014348bd15.png)
 
-
+The method shuffleKey() on line 6 should make the following changes to the key with the
+frequency given (you can approximate this using Math.random() * 100):
+* Swap single letters (90%)
+* Swap random rows (2%)
+* Swap columns (2%)
+* Flip all rows (2%)
+* Flip all columns (2%)
+* Reverse the whole key (2%)
