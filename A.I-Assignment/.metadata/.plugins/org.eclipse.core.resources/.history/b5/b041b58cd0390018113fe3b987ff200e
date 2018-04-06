@@ -249,21 +249,4 @@ public class CipherBreaker {
         return bigram;
     }// End of GetLetter
     
-    /**
-     * Decrypt decryptes the DecryptedText with the Key.
-     * @param Key
-     * @return
-     */
-    private String Decrypt(String Key) {
-
-        DecryptedText = new String();
-        Matrix = StringToMatrix(Key);
-
-        for (int i = 0; i < Text.length(); i += 2) {
-            DecryptedText += GetLetter(Text.charAt(i), Text.charAt(i + 1));
-        }
-
-        return DecryptedText;
-    } // End of Decrypt
-    
 }
