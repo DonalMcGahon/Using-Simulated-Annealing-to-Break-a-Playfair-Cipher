@@ -9,8 +9,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CipherBreaker {
 	
 	/**
-	* Variables
-	*/
+	 * Variables
+	 */
     int TotalRuns = 0;
     int ReverseKey = 0;
     int SwapRows = 0;
