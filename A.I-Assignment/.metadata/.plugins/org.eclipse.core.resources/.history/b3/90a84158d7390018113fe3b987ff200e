@@ -38,48 +38,45 @@ public class CipherBreaker {
         this.colIndices = new int[26];
     }
 
-    /**
-     * Main method creates a user interface that gives the user options.
+	/**
+	 * Main method creates a user interface that gives the user options.
 	 * 1. Allows user to enter a source file.
 	 * 2. Allows user to enter a output file name.
 	 * 3. Deciphers the source file and outputs it to the output file.
 	 * 4. Exits the application.
-     * @param args
-     */
-    public static void main(String[] args) {
-        CipherBreaker breaker = new CipherBreaker();
-
-        String SourceFile = "", OutputFile = "";
-        Scanner reader = new Scanner(System.in);  // Reading from System.in
-
-        while (true) {
-            System.out.println("PlayfairCipher Breaker\n\n1.Enter Source File\n2.Enter Output File\n3.Decipher\n\n4.Exit");
-
-            System.out.println("\n\nChoose:");
-            int n = reader.nextInt();
-            switch (n) {
-                case 1:
-                    System.out.println("\n\nEnter Source File Name: (eg: helloworld.txt)");
-                    SourceFile = reader.next();
-                    break;
-                case 2:
-                    System.out.println("\n\nEnter Output File Name: (eg. helloworld.txt)");
-                    OutputFile = reader.next();
-                    break;
-                case 3:
-                	long startTime = System.currentTimeMillis();
-                    breaker.BreakCipher(SourceFile, OutputFile);
-                    long estimatedTime = System.currentTimeMillis() - startTime;
-    				System.out.println("Executed in: " + estimatedTime / 1000 + " Seconds");
-                    break;
-                case 4:
-                    reader.close();
-                    return;
-            }
-
-        }
-    }// End of Main
-    
+	 * @param args
+	 */
+	public static void main(String[] args) {
+	    CipherBreaker breaker = new CipherBreaker();
+	
+	    String SourceFile = "", OutputFile = "";
+	    Scanner reader = new Scanner(System.in);  // Reading from System.in
+	
+	    while (true) {
+	        System.out.println("PlayfairCipher Breaker\n\n1.Enter Source File\n2.Enter Output File\n3.Decipher\n\n4.Exit");
+	
+	        System.out.println("\n\nChoose:");
+	        int n = reader.nextInt();
+	        switch (n) {
+	            case 1:
+	                System.out.println("\n\nEnter Source File Name:");
+	                SourceFile = reader.next();
+	                break;
+	            case 2:
+	                System.out.println("\n\nEnter Output File Name:");
+	                OutputFile = reader.next();
+	                break;
+	            case 3:
+	                breaker.BreakCipher(SourceFile, OutputFile);
+	                break;
+	            case 4:
+	                reader.close();
+	                return;
+	        }
+	
+	    }
+	}
+	
     /**
      * The Simulated Annealing Algorithm:
      * Set Temp to 10.0. Loop through Temp until temp -= 1. Have a 
@@ -137,15 +134,14 @@ public class CipherBreaker {
         }
     }// End of BreakCipher
     
-
-    
     /**
      * Prime the the Plain-Text.
      * Stripping out any characters that are not present in the matrix.
      * Parsing any double letters and replacing the second occurrence with the letter X.
 	 * The GenerateKey method takes a char[] key and formats it to the correct length.
-	 * Once the key is the correct length, do one final check to ensure the key
+	 * Once the key is the correct length we then do one final check to ensure our key
 	 * contains 25 unique letters.
+	 * 
      * @param fileName
      * @return
      * @throws FileNotFoundException
@@ -160,7 +156,7 @@ public class CipherBreaker {
         if (content.length() % 2 != 0)
             content += 'X';
         return content;
-    }// End of ReadText
+    }
     
 
     private String GenerateKey() {
@@ -176,19 +172,8 @@ public class CipherBreaker {
             }
         }
         return new String(key); //"THEQUICKBROWNFXMPDVLAZYGS";
-    }// End of GenerateKey
+    }
 
-    /**
-     * Shuffle will do the following:
-     * • Swap single letters (90%)
-     * • Swap random rows (2%)
-     * • Swap columns (2%)
-     * • Flip all rows (2%)
-     * • Flip all columns (2%)
-     * • Reverse the whole key (2%)
-     * @param ParentKey
-     * @return
-     */
     private String Shuffle(String ParentKey) {
         TotalRuns++;
         Random rand = new Random(System.currentTimeMillis());
@@ -253,14 +238,8 @@ public class CipherBreaker {
         if (ShuffledKey.equals(""))
             ShuffledKey = MatrixToString(ShuffleMatrix);
         return ShuffledKey;
-    }// End of Shuffle
+    }
     
-
-    /**
-     * 
-     * @param Key
-     * @return
-     */
     private char[][] StringToMatrix(String Key) {
         char[][] Matrix = new char[5][5];
         Key = Key.toUpperCase();
@@ -277,23 +256,24 @@ public class CipherBreaker {
             }
         }
         return Matrix;
-    }// End of StringToMatrix
-
+    }
+    
     private String MatrixToString(char[][] Matrix) {
         String Key = "";
         for (int i = 0; i < 5; i++) {
             Key += new String(Matrix[i]);
         }
         return Key;
-    }// End of MatrixToString
-
+    }
+    
     private void PrintMatrix(char[][] Matrix) {
         String Key = "";
         for (int i = 0; i < 5; i++) {
             System.out.println(Matrix[i]);
         }
     }// End of PrintMatrix
-
+    
+    
     private String GetLetter(char a, char b) {
         String bigram = "";
         if ((a < 65 || a >= 91) || (b < 65 || b >= 91)) {
@@ -318,7 +298,7 @@ public class CipherBreaker {
         }
         return bigram;
     }// End of GetLetter
-
+    
     /**
      * Decrypt decryptes the DecryptedText with the Key.
      * @param Key
@@ -335,7 +315,7 @@ public class CipherBreaker {
 
         return DecryptedText;
     } // End of Decrypt
-
+    
     /**
      * Create a total4grams and set to 0.
      * Create hashmap called QuadgramsStats.
@@ -387,5 +367,5 @@ public class CipherBreaker {
         }
         return TextQuadgrams;
     }// End of GenerateQuadgrams
-
+    
 }
