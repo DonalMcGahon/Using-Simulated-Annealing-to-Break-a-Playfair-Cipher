@@ -4,7 +4,6 @@ INDEX VERSION 1.129+C:\Users\dmcga\OneDrive\Documents\GitHub\Using-Simulated-Ann
 1477788888.index
 194259052.index
 922380862.index
-140494600.index
 2470519452.index
 3698447926.index
 3666609613.index
