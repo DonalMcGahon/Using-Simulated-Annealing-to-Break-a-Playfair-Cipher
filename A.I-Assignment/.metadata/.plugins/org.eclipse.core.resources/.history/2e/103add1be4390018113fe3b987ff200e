@@ -370,9 +370,7 @@ public class CipherBreaker {
     }// End of CalculateFitness
 
     /**
-     * New Arraylist called TextQuadgrams. Loop through while
-     * i < Text.length - 4. Add Text.substring(i, i + 4) to
-     * TextQuadgrams and return TextQuadgrams.
+     * New Arraylist called TextQuadgrams. Iterate text length
      * @param Text
      * @return
      */

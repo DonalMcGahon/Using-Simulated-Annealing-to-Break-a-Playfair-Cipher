@@ -255,6 +255,12 @@ public class CipherBreaker {
         return ShuffledKey;
     }// End of Shuffle
     
+
+    /**
+     * 
+     * @param Key
+     * @return
+     */
     private char[][] StringToMatrix(String Key) {
         char[][] Matrix = new char[5][5];
         Key = Key.toUpperCase();
@@ -370,9 +376,7 @@ public class CipherBreaker {
     }// End of CalculateFitness
 
     /**
-     * New Arraylist called TextQuadgrams. Loop through while
-     * i < Text.length - 4. Add Text.substring(i, i + 4) to
-     * TextQuadgrams and return TextQuadgrams.
+     * New Arraylist called TextQuadgrams. Iterate text length
      * @param Text
      * @return
      */
