@@ -8,9 +8,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class CipherBreaker {
 	
-	/**
-	 * Variables
-	 */
     int TotalRuns = 0;
     int ReverseKey = 0;
     int SwapRows = 0;
@@ -38,6 +35,7 @@ public class CipherBreaker {
         this.colIndices = new int[26];
     }
 
+
 	/**
 	 * Main method creates a user interface that gives the user options.
 	 * 1. Allows user to enter a source file.
@@ -46,6 +44,7 @@ public class CipherBreaker {
 	 * 4. Exits the application.
 	 * @param args
 	 */
+
 	public static void main(String[] args) {
 	    CipherBreaker breaker = new CipherBreaker();
 	

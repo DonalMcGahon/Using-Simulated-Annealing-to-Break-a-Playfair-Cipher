@@ -38,6 +38,7 @@ public class CipherBreaker {
         this.colIndices = new int[26];
     }
 
+
 	/**
 	 * Main method creates a user interface that gives the user options.
 	 * 1. Allows user to enter a source file.
