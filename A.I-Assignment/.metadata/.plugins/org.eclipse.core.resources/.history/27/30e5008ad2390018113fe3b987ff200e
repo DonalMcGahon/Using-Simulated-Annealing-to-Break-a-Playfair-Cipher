@@ -78,61 +78,12 @@ public class CipherBreaker {
 	}
 	
     /**
-     * The Simulated Annealing Algorithm:
-     * Set Temp to 10.0. Loop through Temp until temp -= 1. Have a 
-     * nested loop of Transitions to be made until it reaches 0. Set
-     * ChildKey to a permutation of the parent key using the Shuffle method.
-     * Use this new key to decipher the text, and score the deciphered text.
-     * Get the delta by subtracting the Parentfitness value from the Childfitness.
-     * If the delta is greater than zero, the Childfitness is better than the Parentfitness, 
-     * the child is more fit, then we always accept it. Otherwise the child is worse,
-	 * but to avoid heuristic plateauing, take a worse child if its probability is
-	 * close to 1 accept the unfit child, if the value is close to 0, reject the unfit childkey.
+     * The Simulated Annealing Algorithm
      * @param FileName
      * @param OutputFile
      */
     public void BreakCipher(String FileName, String OutputFile) {
-        try {
-            if (QuadgramsStats == null) {
-                ReadQuadgramStats();
-            }
-            Random rand = new Random();
-            Text = ReadText(FileName);
-            Temp = 10.0;
-            String ParentKey = GenerateKey();
-            DecryptedText = Decrypt(ParentKey);
-            Double Parentfitness = CalculateFitness(DecryptedText);
-
-            for (; Temp > 0; Temp -= 1) {
-                for (Transitions = 50000; Transitions > 0; Transitions -= 1) {
-                    String ChildKey = Shuffle(ParentKey);
-                    DecryptedText = Decrypt(ChildKey);
-                    Double Childfitness = CalculateFitness(DecryptedText);
-                    Double Delta = Childfitness - Parentfitness;
-
-                    if (Delta > 0) {
-                        ParentKey = ChildKey;
-                        Parentfitness = Childfitness;
-                        System.out.println(ParentKey);
-                        System.out.println(Parentfitness);
-                    } else if (Delta < 0 && (1.0 / Math.exp((-1 * Delta) / Temp) > rand.nextDouble())) {
-                        ParentKey = ChildKey;
-                        Parentfitness = Childfitness;
-                    }
-                }
-            }
-            DecryptedText = Decrypt(ParentKey);
-            try (PrintWriter out = new PrintWriter(OutputFile)) {
-                out.println(DecryptedText);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (ArrayIndexOutOfBoundsException e) {
-            e.printStackTrace();
-        } catch (StringIndexOutOfBoundsException e) {
-            e.printStackTrace();
-        }
-    }// End of BreakCipher
+    }
     
     /**
      * Prime the the Plain-Text.
