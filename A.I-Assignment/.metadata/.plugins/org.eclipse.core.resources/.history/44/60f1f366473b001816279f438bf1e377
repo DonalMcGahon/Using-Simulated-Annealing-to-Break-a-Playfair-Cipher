@@ -104,7 +104,7 @@ public class CipherBreaker {
             if (Text.length() <= 120)
                 Temp = 10.0 + (0.087 * (Text.length() - 84));
             else if (Text.length() <= 130)
-                Temp = 12.0;
+                Temp = 9.0;
             else
                 Temp = 10.0;
             String ParentKey = GenerateKey();

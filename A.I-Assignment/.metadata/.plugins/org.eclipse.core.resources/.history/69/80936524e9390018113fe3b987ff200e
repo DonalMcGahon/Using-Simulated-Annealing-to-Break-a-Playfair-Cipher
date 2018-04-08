@@ -101,18 +101,13 @@ public class CipherBreaker {
             }
             Random rand = new Random();
             Text = ReadText(FileName);
-            if (Text.length() <= 120)
-                Temp = 10.0 + (0.087 * (Text.length() - 84));
-            else if (Text.length() <= 130)
-                Temp = 12.0;
-            else
-                Temp = 10.0;
+            Temp = 8.0;
             String ParentKey = GenerateKey();
             DecryptedText = Decrypt(ParentKey);
             Double Parentfitness = CalculateFitness(DecryptedText);
 
             for (; Temp > 0; Temp -= 1) {
-                for (Transitions = 50000; Transitions > 0; Transitions -= 1) {
+                for (Transitions = 45000; Transitions > 0; Transitions -= 1) {
                     String ChildKey = Shuffle(ParentKey);
                     DecryptedText = Decrypt(ChildKey);
                     Double Childfitness = CalculateFitness(DecryptedText);

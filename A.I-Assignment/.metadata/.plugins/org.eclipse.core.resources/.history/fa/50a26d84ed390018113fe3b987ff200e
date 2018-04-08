@@ -102,11 +102,11 @@ public class CipherBreaker {
             Random rand = new Random();
             Text = ReadText(FileName);
             if (Text.length() <= 120)
-                Temp = 10.0 + (0.087 * (Text.length() - 84));
+                Temp = 6.0 + (0.087 * (Text.length() - 84));
             else if (Text.length() <= 130)
-                Temp = 12.0;
-            else
                 Temp = 10.0;
+            else
+                Temp = 12.0;
             String ParentKey = GenerateKey();
             DecryptedText = Decrypt(ParentKey);
             Double Parentfitness = CalculateFitness(DecryptedText);
