@@ -1,0 +1,392 @@
+package ie.gmit.sw.ai;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class CipherBreaker {
+	
+	/**
+	* Variables
+	*/
+    int TotalRuns = 0;
+    int ReverseKey = 0;
+    int SwapRows = 0;
+    int SwapColumns = 0;
+    int FlipRows = 0;
+    int FlipColumns = 0;
+    int SwapChars = 0;
+
+    char[][] Matrix;
+
+    String Text;
+    String DecryptedText;
+
+    int[] rowIndices;
+    int[] colIndices;
+
+    Map<String, Integer> QuadgramsStats;
+    Double Total4Grams;
+
+    Double Temp;
+    int Transitions;
+
+    public CipherBreaker() {
+        this.rowIndices = new int[26];
+        this.colIndices = new int[26];
+    }
+
+    /**
+     * Main method creates a user interface that gives the user options.
+	 * 1. Allows user to enter a source file.
+	 * 2. Allows user to enter a output file name.
+	 * 3. Deciphers the source file and outputs it to the output file.
+	 * 4. Exits the application.
+     * @param args
+     */
+    public static void main(String[] args) {
+        CipherBreaker breaker = new CipherBreaker();
+
+        String SourceFile = "", OutputFile = "";
+        Scanner reader = new Scanner(System.in);  // Reading from System.in
+
+        while (true) {
+            System.out.println("PlayfairCipher Breaker\n\n1.Enter Source File\n2.Enter Output File\n3.Decipher\n\n4.Exit");
+
+            System.out.println("\n\nChoose:");
+            int n = reader.nextInt();
+            switch (n) {
+                case 1:
+                    System.out.println("\n\nEnter Source File Name: (eg: helloworld.txt)");
+                    SourceFile = reader.next();
+                    break;
+                case 2:
+                    System.out.println("\n\nEnter Output File Name: (eg. helloworld.txt)");
+                    OutputFile = reader.next();
+                    break;
+                case 3:
+                	long startTime = System.currentTimeMillis();
+                    breaker.BreakCipher(SourceFile, OutputFile);
+                    long estimatedTime = System.currentTimeMillis() - startTime;
+    				System.out.println("Executed in: " + estimatedTime / 1000 + " Seconds");
+                    break;
+                case 4:
+                    reader.close();
+                    return;
+            }
+
+        }
+    }// End of Main
+    
+    /**
+     * The Simulated Annealing Algorithm:
+     * Set Temp to 10.0. Loop through Temp until temp -= 1. Have a 
+     * nested loop of Transitions to be made until it reaches 0. Set
+     * ChildKey to a permutation of the parent key using the Shuffle method.
+     * Use this new key to decipher the text, and score the deciphered text.
+     * Get the delta by subtracting the Parentfitness value from the Childfitness.
+     * If the delta is greater than zero, the Childfitness is better than the Parentfitness, 
+     * the child is more fit, then we always accept it. Otherwise the child is worse,
+	 * but to avoid heuristic plateauing, take a worse child if its probability is
+	 * close to 1 accept the unfit child, if the value is close to 0, reject the unfit childkey.
+     * @param FileName
+     * @param OutputFile
+     */
+    public void BreakCipher(String FileName, String OutputFile) {
+        try {
+            if (QuadgramsStats == null) {
+                ReadQuadgramStats();
+            }
+            Random rand = new Random();
+            Text = ReadText(FileName);
+            if (Text.length() <= 120)
+                Temp = 10.0 + (0.087 * (Text.length() - 84));
+            else if (Text.length() <= 130)
+                Temp = 12.0;
+            else
+                Temp = 10.0;
+            String ParentKey = GenerateKey();
+            DecryptedText = Decrypt(ParentKey);
+            Double Parentfitness = CalculateFitness(DecryptedText);
+
+            for (; Temp > 0; Temp -= 1) {
+                for (Transitions = 50000; Transitions > 0; Transitions -= 1) {
+                    String ChildKey = Shuffle(ParentKey);
+                    DecryptedText = Decrypt(ChildKey);
+                    Double Childfitness = CalculateFitness(DecryptedText);
+                    Double Delta = Childfitness - Parentfitness;
+
+                    if (Delta > 0) {
+                        ParentKey = ChildKey;
+                        Parentfitness = Childfitness;
+                        System.out.println(ParentKey);
+                        System.out.println(Parentfitness);
+                    } else if (Delta < 0 && (1.0 / Math.exp((-1 * Delta) / Temp) > rand.nextDouble())) {
+                        ParentKey = ChildKey;
+                        Parentfitness = Childfitness;
+                    }
+                }
+            }
+            DecryptedText = Decrypt(ParentKey);
+            try (PrintWriter out = new PrintWriter(OutputFile)) {
+                out.println(DecryptedText);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+    }// End of BreakCipher
+    
+
+    
+    /**
+     * Prime the the Plain-Text.
+     * Stripping out any characters that are not present in the matrix.
+     * Parsing any double letters and replacing the second occurrence with the letter X.
+	 * The GenerateKey method takes a char[] key and formats it to the correct length.
+	 * Once the key is the correct length, do one final check to ensure the key
+	 * contains 25 unique letters.
+     * @param fileName
+     * @return
+     * @throws FileNotFoundException
+     */
+    private String ReadText(String fileName) throws FileNotFoundException {
+        String content =
+                new Scanner(new File(fileName))
+                        .useDelimiter("\\Z").next();
+        content = content.substring(content.lastIndexOf('\n') + 1);
+        content = content.replaceAll("[^A-Za-z0-9 ]", "");
+        content = content.replaceAll("[^A-Z]", "");
+        if (content.length() % 2 != 0)
+            content += 'X';
+        return content;
+    }// End of ReadText
+    
+
+    private String GenerateKey() {
+        char[] key = "abcdefghiklmnopqrstuvwxyz".toUpperCase().toCharArray();
+        int index;
+        Random random = ThreadLocalRandom.current();
+        for (int i = key.length - 1; i > 0; i--) {
+            index = random.nextInt(i + 1);
+            if (index != i) {
+                key[index] ^= key[i];
+                key[i] ^= key[index];
+                key[index] ^= key[i];
+            }
+        }
+        return new String(key); //"THEQUICKBROWNFXMPDVLAZYGS";
+    }// End of GenerateKey
+
+    /**
+     * Shuffle will do the following:
+     * • Swap single letters (90%)
+     * • Swap random rows (2%)
+     * • Swap columns (2%)
+     * • Flip all rows (2%)
+     * • Flip all columns (2%)
+     * • Reverse the whole key (2%)
+     * @param ParentKey
+     * @return
+     */
+    private String Shuffle(String ParentKey) {
+        TotalRuns++;
+        Random rand = new Random(System.currentTimeMillis());
+        Double Prob = rand.nextDouble();
+        String ShuffledKey = "";
+        char[][] ShuffleMatrix = StringToMatrix(ParentKey);
+        int r1, r2;
+        r1 = rand.nextInt(5);
+        r2 = rand.nextInt(5);
+
+        while (r1 == r2)
+            r2 = rand.nextInt(5);
+
+        if (Prob <= 0.02) {
+            //Reverse Key
+            ShuffledKey = new StringBuilder(ParentKey).reverse().toString();
+            ReverseKey++;
+        } else if (Prob <= 0.04) {
+            //Flip Rows
+            for (int i = 0; i < 5; i++) {
+                ShuffleMatrix[i] = (new StringBuilder(new String(ShuffleMatrix[i])).reverse().toString()).toCharArray();
+            }
+            FlipRows++;
+
+        } else if (Prob <= 0.06) {
+            //Flip Columns
+            for (int i = 0; i < 5; i++) {
+                char temp = ShuffleMatrix[0][i];
+                ShuffleMatrix[0][i] = ShuffleMatrix[4][i];
+                ShuffleMatrix[4][i] = temp;
+                temp = ShuffleMatrix[1][i];
+                ShuffleMatrix[1][i] = ShuffleMatrix[3][i];
+                ShuffleMatrix[3][i] = temp;
+                FlipColumns++;
+            }
+
+        } else if (Prob <= 0.08) {
+            //Swap Random Rows
+            char[] temp = ShuffleMatrix[r1];
+            ShuffleMatrix[r1] = ShuffleMatrix[r2];
+            ShuffleMatrix[r2] = temp;
+            SwapRows++;
+        } else if (Prob <= 0.1) {
+            //Swap Random Columns
+            for (int i = 0; i < 5; i++) {
+                char temp = ShuffleMatrix[i][r1];
+                ShuffleMatrix[i][r1] = ShuffleMatrix[i][r2];
+                ShuffleMatrix[i][r2] = temp;
+                SwapColumns++;
+            }
+
+        } else {
+            //Swap Characters
+            r1 = rand.nextInt(25);
+            r2 = rand.nextInt(25);
+
+            char temp = ShuffleMatrix[r1 / 5][r1 % 5];
+            ShuffleMatrix[r1 / 5][r1 % 5] = ShuffleMatrix[r2 / 5][r2 % 5];
+            ShuffleMatrix[r2 / 5][r2 % 5] = temp;
+            SwapChars++;
+        }
+        if (ShuffledKey.equals(""))
+            ShuffledKey = MatrixToString(ShuffleMatrix);
+        return ShuffledKey;
+    }// End of Shuffle
+    
+    private char[][] StringToMatrix(String Key) {
+        char[][] Matrix = new char[5][5];
+        Key = Key.toUpperCase();
+        int row = 0;
+        int col = 0;
+        for (int i = 0; i < 25; i++) {
+            Matrix[row][col] = Key.charAt(i);
+            rowIndices[Key.charAt(i) - 65] = row;
+            colIndices[Key.charAt(i) - 65] = col;
+            col++;
+            if (col == 5) {
+                row++;
+                col = 0;
+            }
+        }
+        return Matrix;
+    }// End of StringToMatrix
+
+    private String MatrixToString(char[][] Matrix) {
+        String Key = "";
+        for (int i = 0; i < 5; i++) {
+            Key += new String(Matrix[i]);
+        }
+        return Key;
+    }// End of MatrixToString
+
+    private void PrintMatrix(char[][] Matrix) {
+        String Key = "";
+        for (int i = 0; i < 5; i++) {
+            System.out.println(Matrix[i]);
+        }
+    }// End of PrintMatrix
+
+    private String GetLetter(char a, char b) {
+        String bigram = "";
+        if ((a < 65 || a >= 91) || (b < 65 || b >= 91)) {
+            return "";
+        }
+
+        int rowA = rowIndices[a - 65],
+                colA = colIndices[a - 65];
+
+        int rowB = rowIndices[b - 65],
+                colB = colIndices[b - 65];
+
+        if (rowA == rowB) {
+            bigram += Matrix[rowA][colA - 1 < 0 ? 4 : colA - 1];
+            bigram += Matrix[rowB][colB - 1 < 0 ? 4 : colB - 1];
+        } else if (colA == colB) {
+            bigram += Matrix[rowA - 1 < 0 ? 4 : rowA - 1][colB];
+            bigram += Matrix[rowB - 1 < 0 ? 4 : rowB - 1][colA];
+        } else {
+            bigram += Matrix[rowA][colB];
+            bigram += Matrix[rowB][colA];
+        }
+        return bigram;
+    }// End of GetLetter
+
+    /**
+     * Decrypt decryptes the DecryptedText with the Key.
+     * @param Key
+     * @return
+     */
+    private String Decrypt(String Key) {
+
+        DecryptedText = new String();
+        Matrix = StringToMatrix(Key);
+
+        for (int i = 0; i < Text.length(); i += 2) {
+            DecryptedText += GetLetter(Text.charAt(i), Text.charAt(i + 1));
+        }
+
+        return DecryptedText;
+    } // End of Decrypt
+
+    /**
+     * Create a total4grams and set to 0.
+     * Create hashmap called QuadgramsStats.
+     * Set the hashmap = QuadgramsStats.putIfAbsent(tokens[0], Integer.parseInt(tokens[1]));
+     * Set total4grams = Total4Grams += Integer.parseInt(tokens[1]);
+     * @throws FileNotFoundException
+     */
+    
+    private void ReadQuadgramStats() throws FileNotFoundException {
+        Total4Grams = 0.0;
+        QuadgramsStats = new HashMap<>();
+        File file = new File("4grams.txt");
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+            String[] tokens = line.split(" ");
+            QuadgramsStats.putIfAbsent(tokens[0], Integer.parseInt(tokens[1]));
+            Total4Grams += Integer.parseInt(tokens[1]);
+        }
+    }// End of ReadQuadgramStats
+
+    /**
+     * CalculateFitness calculates the fitness of the key as Score = Score += Math.log10(Probability);
+     * @param Text
+     * @return
+     */
+    private double CalculateFitness(String Text) {
+        ArrayList<String> TextQuadgrams = GenerateQuadgrams(Text);
+        Double Score = 0.0;
+
+        for (String Quadgram : TextQuadgrams) {
+            if (QuadgramsStats.containsKey(Quadgram)) {
+                Double Probability = QuadgramsStats.get(Quadgram) / Total4Grams;
+                Score += Math.log10(Probability);
+            }
+        }
+        return Score;
+    }// End of CalculateFitness
+
+    /**
+     * New Arraylist called TextQuadgrams. Loop through while
+     * i < Text.length - 4. Add Text.substring(i, i + 4) to
+     * TextQuadgrams and return TextQuadgrams.
+     * @param Text
+     * @return
+     */
+    private ArrayList<String> GenerateQuadgrams(String Text) {
+        ArrayList<String> TextQuadgrams = new ArrayList<>();
+        for (int i = 0; i < Text.length() - 4; i++) {
+            TextQuadgrams.add(Text.substring(i, i + 4));
+        }
+        return TextQuadgrams;
+    }// End of GenerateQuadgrams
+
+}
