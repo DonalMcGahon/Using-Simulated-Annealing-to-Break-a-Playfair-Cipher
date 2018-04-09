@@ -82,9 +82,8 @@ public class CipherBreaker {
     
     /**
      * The Simulated Annealing Algorithm:
-     * The initial temperature for SA is dependent upon the text length.
-     * Loop through Temp until temp -= 1. 
-     * Have a nested loop of Transitions to be made until it reaches 0. Set
+     * Set Temp to 10.0. Loop through Temp until temp -= 1. Have a 
+     * nested loop of Transitions to be made until it reaches 0. Set
      * ChildKey to a permutation of the parent key using the Shuffle method.
      * Use this new key to decipher the text, and score the deciphered text.
      * Get the delta by subtracting the Parentfitness value from the Childfitness.
@@ -103,11 +102,11 @@ public class CipherBreaker {
             Random rand = new Random();
             Text = ReadText(FileName);
             if (Text.length() <= 120)
-                Temp = 3.0 + (0.087 * (Text.length() - 84));
+                Temp = 4.0 + (0.087 * (Text.length() - 84));
             else if (Text.length() <= 130)
-                Temp = 4.0;
-            else
                 Temp = 5.0;
+            else
+                Temp = 10.0;
             String ParentKey = GenerateKey();
             DecryptedText = Decrypt(ParentKey);
             Double Parentfitness = CalculateFitness(DecryptedText);
